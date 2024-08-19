@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Sign-In/Sign-Out Form with Interactivity</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #55848c, #27282d);        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            transition: all 0.3s ease;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #343a40;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #495057;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #292e34;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .dropdown select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #ffffff;
+            cursor: pointer;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+
+        .dropdown select:focus {
+            border-color: #3f4d5b;
+            background-color: #b1becb;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #48778c;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #122c29;
+        }
+
+        .toggle-text, .forgot-password {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .toggle-text a, .forgot-password a {
+            color: #5c6f84;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .toggle-text a:hover, .forgot-password a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h2 {
+                font-size: 20px;
+            }
+
+            .input-group label {
+                font-size: 14px;
+            }
+
+            .input-group input, .dropdown select {
+                padding: 10px;
+            }
+
+            button {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            .toggle-text, .forgot-password {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="authForm">
+            <h2 id="formTitle">Sign In</h2>
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Enter your email" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your password" required>
+            </div>
+            <div class="dropdown">
+                <select id="userRole">
+                    <option value="" disabled selected>Select your role</option>
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <input type="checkbox" id="rememberMe">
+                <label for="rememberMe">Remember Me</label>
+            </div>
+            <button type="submit">Sign In</button>
+            <p class="forgot-password"><a href="#">Forgot Password?</a></p>
+            <p class="toggle-text">Don't have an account? <a id="toggleForm">Sign Up</a></p>
+        </form>
+    </div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="modalMessage">Form submitted successfully!</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById('authForm');
+            const formTitle = document.getElementById('formTitle');
+            const toggleForm = document.getElementById('toggleForm');
+            const modal = document.getElementById('myModal');
+            const closeModal = document.querySelector('.close');
+            const modalMessage = document.getElementById('modalMessage');
+            const userRole = document.getElementById('userRole');
+            let isSignUp = false;
+
+            toggleForm.addEventListener('click', function () {
+                isSignUp = !isSignUp;
+                formTitle.textContent = isSignUp ? 'Sign Up' : 'Sign In';
+                form.querySelector('button').textContent = isSignUp ? 'Sign Up' : 'Sign In';
+                toggleForm.textContent = isSignUp ? 'Already have an account? Sign In' : 'Don\'t have an account? Sign Up';
+                userRole.style.display = isSignUp ? 'block' : 'none';
+            });
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                modalMessage.textContent = isSignUp ? 'Sign Up successful!' : 'Sign In successful!';
+                modal.style.display = "block";
+            });
+
+            closeModal.addEventListener('click', function () {
+                modal.style.display = "none";
+            });
+
+            window.addEventListener('click', function (event) {
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
